@@ -1,4 +1,4 @@
-const scriptURL = "BURA_YENI_ALDIĞIN_LINKI_YAPISDIR"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycby_zeZwqNpaYsDc4GqiUFXZE5YSnJFp3DZHhnnlDpGgVvo53YnvzQkC8CWNMsDRrGoIMw/exec"; 
 let generatedCode = ""; 
 
 function sendCode() {
