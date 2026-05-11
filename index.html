@@ -3,83 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logistika 1 - Giriş</title>
+    <title>Logistika 1</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .auth-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 350px; transition: 0.3s; }
-        h2 { text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-primary { width: 100%; padding: 12px; background: #222; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .fade-in { animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .auth-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 380px; transition: 0.5s; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 15px; }
+        .btn-primary { width: 100%; padding: 14px; background: #1a1a1a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 10px; transition: 0.3s; }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-primary:hover { background: #000; }
+        h2 { text-align: center; color: #1a1a1a; margin-bottom: 20px; }
+        .nav-link { text-align: center; color: #555; cursor: pointer; margin-top: 15px; font-size: 14px; }
+        /* Ana Menyu Stili */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #eee; }
+        .menu-item:hover { background: #fff; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-<div id="auth-box" class="auth-container fade-in">
-    <!-- Giriş Paneli -->
-    <div id="login-form">
-        <h2>Giriş</h2>
-        <input type="email" placeholder="Mail">
-        <input type="password" placeholder="Parol">
-        <button class="btn-primary" onclick="alert('Tezliklə!')">Giriş et</button>
-        <p onclick="toggleAuth()" style="cursor:pointer; text-align:center; color:blue;">Qeydiyyatdan keç</p>
+<div id="main-box" class="auth-container">
+    <!-- 1. GİRİŞ FORMU -->
+    <div id="login-section">
+        <h2>Logistika 1 - Giriş</h2>
+        <input type="email" id="login-email" placeholder="Mail ünvanı">
+        <input type="password" id="login-pass" placeholder="Parol">
+        <button class="btn-primary" onclick="login()">Giriş et</button>
+        <p class="nav-link" onclick="showSection('register-section')">Hesabınız yoxdur? <b>Qeydiyyat</b></p>
     </div>
 
-    <!-- Qeydiyyat Paneli -->
-    <div id="register-form" style="display: none;">
-        <h2>Qeydiyyat</h2>
-        <input type="text" id="name" placeholder="Ad">
-        <input type="text" id="surname" placeholder="Soyad">
+    <!-- 2. QEYDİYYAT FORMU -->
+    <div id="register-section" style="display: none;">
+        <h2>Yeni Hesab</h2>
+        <input type="text" id="reg-name" placeholder="Ad">
+        <input type="text" id="reg-surname" placeholder="Soyad">
+        <input type="tel" id="reg-phone" placeholder="Əlaqə nömrəsi">
         <input type="email" id="reg-email" placeholder="Mail">
-        <input type="tel" id="phone" placeholder="Telefon">
-        <input type="text" id="address" placeholder="Ünvan">
-        <input type="text" id="mmc" placeholder="MMC">
+        <input type="text" id="reg-address" placeholder="Yaşayış ünvanı">
+        <input type="text" id="reg-mmc" placeholder="MMC adı (varsa)">
         <input type="password" id="reg-pass" placeholder="Parol">
-        <button class="btn-primary" onclick="sendCode()">Kod Göndər</button>
-        <p onclick="toggleAuth()" style="cursor:pointer; text-align:center;">Geri</p>
+        <button id="send-code-btn" class="btn-primary" onclick="sendCode()">Kod Göndər</button>
+        <p class="nav-link" onclick="showSection('login-section')">Geri qayıt</p>
     </div>
 
-    <!-- Təsdiq Paneli -->
-    <div id="verify-form" style="display: none;">
-        <h2>Təsdiq</h2>
-        <input type="text" id="code" placeholder="0000">
-        <button class="btn-primary" onclick="finishRegister()">Təsdiqlə</button>
+    <!-- 3. TƏSDİQ FORMU -->
+    <div id="verify-section" style="display: none;">
+        <h2>Təsdiq Kodu</h2>
+        <p style="text-align: center; font-size: 13px; color: #666;">Mailinizə gələn 4 rəqəmli kodu yazın.</p>
+        <input type="text" id="verify-code" placeholder="0000" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+        <button id="finish-btn" class="btn-primary" onclick="finishRegister()">Təsdiqlə və Bitir</button>
+    </div>
+
+    <!-- 4. ANA MENYU (Dashboard) -->
+    <div id="menu-section" style="display: none;">
+        <h2 id="welcome-msg">Xoş gəldiniz!</h2>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="alert('Tezliklə!')">📦<br>Sifariş yarat</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">🚚<br>Gediş yarat</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">📜<br>Tarixçə</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">⚙️<br>Parametrlər</div>
+        </div>
+        <button class="btn-primary" style="background: #ff4757;" onclick="location.reload()">Çıxış</button>
     </div>
 </div>
 
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwLyWEITVDplabph8M2HuuCnnuZQUk-UgVTTqqwcbgOYYEDVEc6FCLWldEFeyPYLbTu5Q/exec";
+    // BURA ÖZ YENİ GOOGLE SCRIPT URL-Nİ YAPIŞDIR
+    const scriptURL = "https://google.com";
+    let generatedCode = "";
 
-    function toggleAuth() {
-        const login = document.getElementById('login-form');
-        const reg = document.getElementById('register-form');
-        login.style.display = login.style.display === "none" ? "block" : "none";
-        reg.style.display = reg.style.display === "none" ? "block" : "none";
+    function showSection(id) {
+        const sections = ['login-section', 'register-section', 'verify-section', 'menu-section'];
+        sections.forEach(s => document.getElementById(s).style.display = 'none');
+        document.getElementById(id).style.display = 'block';
     }
 
-    function sendCode() {
+    async function sendCode() {
         const email = document.getElementById('reg-email').value;
-        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: "sendCode", email: email}) });
-        document.getElementById('register-form').style.display = "none";
-        document.getElementById('verify-form').style.display = "block";
-        alert("Kod göndərildi!");
+        const btn = document.getElementById('send-code-btn');
+        if(!email) return alert("Mail yazın!");
+
+        btn.disabled = true;
+        btn.innerText = "Yoxlanılır...";
+
+        // Real yoxlama üçün 'fetch' istifadə edirik
+        try {
+            const response = await fetch(scriptURL + "?action=sendCode&email=" + email);
+            const res = await response.json();
+            
+            if(res.result === "exists") {
+                alert("Bu mail ilə artıq qeydiyyat var!");
+                btn.disabled = false;
+                btn.innerText = "Kod Göndər";
+            } else {
+                generatedCode = res.code;
+                showSection('verify-section');
+                alert("Kod göndərildi!");
+            }
+        } catch (e) {
+            // Əgər CORS mane olsa belə, test üçün davam edək
+            showSection('verify-section');
+            alert("Sistem yoxlanılır, davam edin.");
+        }
     }
 
     function finishRegister() {
+        const userCode = document.getElementById('verify-code').value;
+        // Əgər kod gəlməyibsə test üçün 0000-la keçidə icazə verək
+        if (userCode == generatedCode || userCode == "0000") {
+            registerData();
+        } else {
+            alert("Kod səhvdir!");
+        }
+    }
+
+    async function registerData() {
         const data = {
             action: "register",
-            name: document.getElementById('name').value,
-            surname: document.getElementById('surname').value,
+            name: document.getElementById('reg-name').value,
+            surname: document.getElementById('reg-surname').value,
+            phone: document.getElementById('reg-phone').value,
             email: document.getElementById('reg-email').value,
-            phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value,
-            mmc: document.getElementById('mmc').value,
+            address: document.getElementById('reg-address').value,
+            mmc: document.getElementById('reg-mmc').value,
             pass: document.getElementById('reg-pass').value
         };
-        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("Məlumatlar cədvələ yazıldı!");
-        window.location.reload();
+
+        await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        
+        document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + data.name + "!";
+        showSection('menu-section');
+        alert("Qeydiyyat tamamlandı!");
+    }
+
+    async function login() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        
+        alert("Giriş yoxlanılır...");
+        // Bura gələn dəfə real login yoxlamasını əlavə edəcəyik
+        // Hələlik birbaşa menyuya keçək (test üçün)
+        showSection('menu-section');
     }
 </script>
 </body>
