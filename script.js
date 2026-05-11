@@ -1,5 +1,5 @@
 // Google Apps Script-dən kopyaladığın URL-i aşağıdakı dırnaqların arasına yapışdır:
-const scriptURL = "BURA_LINKI_YAPISDIR"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycbyTzw5z_W_JU4UvOx7NY-QtE7qH6_smOUP7gqanQz0u2ugytN1IgLJTO_Sm7MXPvNeSww/exec"; 
 
 let generatedCode = ""; 
 
