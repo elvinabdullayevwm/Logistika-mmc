@@ -1,4 +1,4 @@
-const scriptURL = "https://script.google.com/macros/s/AKfycby_zeZwqNpaYsDc4GqiUFXZE5YSnJFp3DZHhnnlDpGgVvo53YnvzQkC8CWNMsDRrGoIMw/exec"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycbyl9-FroOsQXzGGPYDU5yMEXAc7fdmCHYA27Pbp0943neZjsDzdElF4ZqLJpKU9u1HsKA/exec"; 
 let systemGeneratedCode = ""; 
 
 function toggleAuth() {
