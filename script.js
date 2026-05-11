@@ -1,4 +1,4 @@
-const scriptURL = "BURA_YENİ_URL_YAPIŞDIR"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycbwgktPQUEy934AfP7Vc3mbi7HiNvxRpD1srfHxoTB_IdQyH6ZB-YAgbV0wVxJXNCgQ2Qw/exec"; 
 let systemGeneratedCode = ""; // Hər dəfə sıfırlanacaq
 
 function sendCode() {
