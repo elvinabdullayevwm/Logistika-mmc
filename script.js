@@ -1,4 +1,4 @@
-const scriptURL = "BURA_SONUNCU_ALDIĞIN_LINKI_YAPISDIR"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycbywkcnOU522evB_ExvyXDljHZiSULARONDTOyHNtFTRZPh6xeyRCGfWwynjKwRdjfKdsA/exec"; 
 
 // 1. Pəncərələr arası keçid (Bayaq işləməyən hissə buydu)
 function toggleAuth() {
