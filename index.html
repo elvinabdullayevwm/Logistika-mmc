@@ -7,9 +7,10 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .auth-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 380px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .btn-primary { width: 100%; padding: 14px; background: #1a1a1a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 10px; }
         h2 { text-align: center; color: #1a1a1a; }
+        .nav-link { text-align: center; color: #555; cursor: pointer; margin-top: 15px; font-size: 14px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .menu-item { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
         .menu-item:hover { transform: translateY(-5px); background: #fff; }
@@ -18,16 +19,16 @@
 <body>
 
 <div id="main-box" class="auth-container">
-    <!-- GİRİŞ -->
+    <!-- 1. GİRİŞ -->
     <div id="login-section">
         <h2>Giriş</h2>
         <input type="email" id="login-email" placeholder="Mail">
         <input type="password" id="login-pass" placeholder="Parol">
         <button class="btn-primary" onclick="login()">Giriş et</button>
-        <p style="text-align:center; cursor:pointer;" onclick="showSection('register-section')">Qeydiyyat</p>
+        <p class="nav-link" onclick="showSection('register-section')">Hesab yarat</p>
     </div>
 
-    <!-- QEYDİYYAT -->
+    <!-- 2. QEYDİYYAT -->
     <div id="register-section" style="display: none;">
         <h2>Qeydiyyat</h2>
         <input type="text" id="reg-name" placeholder="Ad">
@@ -37,54 +38,73 @@
         <input type="text" id="reg-address" placeholder="Ünvan">
         <input type="text" id="reg-mmc" placeholder="MMC">
         <input type="password" id="reg-pass" placeholder="Parol">
-        <button class="btn-primary" onclick="sendCode()">Kod Göndər</button>
+        <button class="btn-primary" id="reg-btn" onclick="sendCode()">Kod Göndər</button>
+        <p class="nav-link" onclick="showSection('login-section')">Geri</p>
     </div>
 
-    <!-- TƏSDİQ -->
+    <!-- 3. TƏSDİQ -->
     <div id="verify-section" style="display: none;">
         <h2>Təsdiq Kodu</h2>
-        <input type="text" id="verify-code" placeholder="0000" maxlength="4" style="text-align:center; font-size:24px;">
+        <input type="text" id="verify-code" placeholder="0000" maxlength="4" style="text-align: center; font-size: 24px;">
         <button class="btn-primary" onclick="finishRegister()">Təsdiqlə</button>
     </div>
 
-    <!-- ANA MENYU -->
+    <!-- 4. ANA MENYU -->
     <div id="menu-section" style="display: none;">
         <h2 id="welcome-msg">Xoş gəldiniz!</h2>
         <div class="menu-grid">
             <div class="menu-item" onclick="showSection('order-section')">📦<br>Sifariş yarat</div>
-            <div class="menu-item">🚚<br>Gediş yarat</div>
-            <div class="menu-item">📜<br>Tarixçə</div>
-            <div class="menu-item">⚙️<br>Parametrlər</div>
+            <div class="menu-item" onclick="showSection('trip-section')">🚚<br>Gediş yarat</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">📜<br>Tarixçə</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">⚙️<br>Parametrlər</div>
         </div>
-        <button class="btn-primary" style="background:red;" onclick="location.reload()">Çıxış</button>
+        <button class="btn-primary" style="background:#ff4757; margin-top:20px;" onclick="location.reload()">Çıxış</button>
     </div>
 
-    <!-- SİFARİŞ YARATMA (Yeni Bölmə) -->
+    <!-- 5. SİFARİŞ YARATMA (Müştəri) -->
     <div id="order-section" style="display: none;">
         <h2>Yeni Sifariş</h2>
-        <input type="text" id="ord-type" placeholder="Malın növü (məs: Qida)">
+        <input type="text" id="ord-type" placeholder="Malın növü">
         <input type="text" id="ord-name" placeholder="Malın adı">
         <input type="text" id="ord-weight" placeholder="Çəkisi (kq/ton)">
         <input type="text" id="ord-volume" placeholder="Həcmi (m3)">
         <input type="text" id="ord-from" placeholder="Haradan">
         <input type="text" id="ord-to" placeholder="Haraya">
-        <label style="font-size:12px;">Təhvil tarixi:</label>
-        <input type="date" id="ord-start">
-        <label style="font-size:12px;">Təslim tarixi:</label>
-        <input type="date" id="ord-end">
+        <input type="date" id="ord-start" title="Təhvil">
+        <input type="date" id="ord-end" title="Təslim">
         <input type="number" id="ord-price" placeholder="Büdcə (AZN)">
-        <textarea id="ord-note" placeholder="Əlavə qeyd..."></textarea>
-        <button id="order-btn" class="btn-primary" onclick="submitOrder()">Sifarişi Tamamla</button>
-        <p style="text-align:center; cursor:pointer;" onclick="showSection('menu-section')">Geri</p>
+        <input type="text" id="ord-note" placeholder="Əlavə qeyd">
+        <button id="ord-btn" class="btn-primary" onclick="submitOrder()">Sifarişi Tamamla</button>
+        <p class="nav-link" onclick="showSection('menu-section')">Geri</p>
+    </div>
+
+    <!-- 6. GEDİŞ YARATMA (Sürücü) -->
+    <div id="trip-section" style="display: none;">
+        <h2>Gediş Elan Et</h2>
+        <input type="text" id="t-car" placeholder="Maşın növü">
+        <input type="text" id="t-brand" placeholder="Markası">
+        <input type="text" id="t-plate" placeholder="Dövlət nömrəsi">
+        <input type="text" id="t-license" placeholder="Vəsiqə kateqoriyası">
+        <input type="number" id="t-exp" placeholder="Təcrübə (il)">
+        <input type="text" id="t-vol" placeholder="Baqaj həcmi (m3)">
+        <input type="text" id="t-weight" placeholder="Götürə biləcəyi çəki (ton)">
+        <input type="text" id="t-from" placeholder="Haradan">
+        <input type="text" id="t-to" placeholder="Haraya">
+        <input type="date" id="t-start">
+        <input type="date" id="t-end">
+        <input type="text" id="t-note" placeholder="Qeyd">
+        <button id="trip-btn" class="btn-primary" onclick="submitTrip()">Elanı Paylaş</button>
+        <p class="nav-link" onclick="showSection('menu-section')">Geri</p>
     </div>
 </div>
 
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwFAnRgwWMOZYu9mGJEP0rFvb_PT92hQWXzQec4YSggUL9vbwFbWhdUStYSpiEy8nvfZA/exec"; 
+    const scriptURL = "https://script.google.com/macros/s/AKfycbysHPUJSw1nNkebR9_8VOCNbM8XCQ3_j8-Zrs1ziq599Ai4AcGTUp36eZ7-Sqa2pxSajQ/exec";
+    let generatedCode = "";
 
     function showSection(id) {
-        const sections = ['login-section', 'register-section', 'verify-section', 'menu-section', 'order-section'];
-        sections.forEach(s => document.getElementById(s).style.display = 'none');
+        const ids = ['login-section', 'register-section', 'verify-section', 'menu-section', 'order-section', 'trip-section'];
+        ids.forEach(s => document.getElementById(s).style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
 
@@ -93,37 +113,36 @@
         const pass = document.getElementById('login-pass').value;
         const response = await fetch(scriptURL + "?action=login&email=" + email + "&pass=" + pass);
         const result = await response.text();
-        if(result !== "wrong") {
-            document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + result + "!";
-            showSection('menu-section');
-        } else alert("Səhv!");
+        if (result === "wrong") alert("Səhv!");
+        else { document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + result + "!"; showSection('menu-section'); }
+    }
+
+    async function sendCode() {
+        const email = document.getElementById('reg-email').value;
+        const phone = document.getElementById('reg-phone').value;
+        const response = await fetch(scriptURL + "?action=checkAndSend&email=" + email + "&phone=" + phone);
+        const result = await response.text();
+        if (result === "exists") alert("Artıq var!");
+        else { generatedCode = result; alert("Kod göndərildi!"); showSection('verify-section'); }
+    }
+
+    async function finishRegister() {
+        const data = { action: "register", name: document.getElementById('reg-name').value, surname: document.getElementById('reg-surname').value, phone: document.getElementById('reg-phone').value, email: document.getElementById('reg-email').value, address: document.getElementById('reg-address').value, mmc: document.getElementById('reg-mmc').value, pass: document.getElementById('reg-pass').value };
+        await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        showSection('menu-section');
     }
 
     async function submitOrder() {
-        const btn = document.getElementById('order-btn');
-        const data = {
-            action: "createOrder",
-            userId: document.getElementById('login-email').value || "Qeydiyyatdan keçib",
-            type: document.getElementById('ord-type').value,
-            name: document.getElementById('ord-name').value,
-            weight: document.getElementById('ord-weight').value,
-            volume: document.getElementById('ord-volume').value,
-            from: document.getElementById('ord-from').value,
-            to: document.getElementById('ord-to').value,
-            dateStart: document.getElementById('ord-start').value,
-            dateEnd: document.getElementById('ord-end').value,
-            price: document.getElementById('ord-price').value,
-            note: document.getElementById('ord-note').value
-        };
-
-        btn.innerText = "Göndərilir...";
+        const data = { action: "createOrder", userId: document.getElementById('login-email').value || "Müştəri", type: document.getElementById('ord-type').value, name: document.getElementById('ord-name').value, weight: document.getElementById('ord-weight').value, volume: document.getElementById('ord-volume').value, from: document.getElementById('ord-from').value, to: document.getElementById('ord-to').value, dateStart: document.getElementById('ord-start').value, dateEnd: document.getElementById('ord-end').value, price: document.getElementById('ord-price').value, note: document.getElementById('ord-note').value };
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("Sifariş Orders vərəqinə yazıldı!");
-        showSection('menu-section');
-        btn.innerText = "Sifarişi Tamamla";
+        alert("Sifariş yaradıldı!"); showSection('menu-section');
     }
 
-    // Digər funksiyalar (sendCode, finishRegister) eyni qaydada qalır...
+    async function submitTrip() {
+        const data = { action: "createTrip", userId: document.getElementById('login-email').value || "Sürücü", carType: document.getElementById('t-car').value, brand: document.getElementById('t-brand').value, plate: document.getElementById('t-plate').value, driverName: "Ad", driverSurname: "Soyad", license: document.getElementById('t-license').value, experience: document.getElementById('t-exp').value, volCap: document.getElementById('t-vol').value, weightCap: document.getElementById('t-weight').value, from: document.getElementById('t-from').value, to: document.getElementById('t-to').value, dateStart: document.getElementById('t-start').value, dateEnd: document.getElementById('t-end').value, note: document.getElementById('t-note').value, reysId: "R"+Math.floor(Math.random()*1000) };
+        await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        alert("Gediş yaradıldı!"); showSection('menu-section');
+    }
 </script>
 </body>
 </html>
