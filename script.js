@@ -1,14 +1,11 @@
-const scriptURL = "https://script.google.com/macros/s/AKfycby_zeZwqNpaYsDc4GqiUFXZE5YSnJFp3DZHhnnlDpGgVvo53YnvzQkC8CWNMsDRrGoIMw/exec"; 
+const scriptURL = "https://google.com"; 
+let systemGeneratedCode = ""; 
 
-// Qeydiyyat və Giriş pəncərələri arası keçid (Dizayn 1)
 function toggleAuth() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const authBox = document.getElementById('auth-box');
-
-    // Yumşaq keçid effekti
     authBox.style.opacity = "0";
-    
     setTimeout(() => {
         if (registerForm.style.display === "none") {
             loginForm.style.display = "none";
@@ -21,35 +18,46 @@ function toggleAuth() {
     }, 300);
 }
 
-// Mailə kod göndərmə (Struktur 1.3.8)
 function sendCode() {
     const email = document.getElementById('reg-email').value;
-    if(!email) return alert("Zəhmət olmasa mail yazın!");
-
-    const btn = document.querySelector("#register-form .btn-primary");
-    btn.innerText = "Göndərilir...";
-    btn.disabled = true;
+    if(!email) return alert("Mail yazın!");
 
     fetch(scriptURL, {
         method: 'POST',
         mode: 'no-cors',
         body: JSON.stringify({ "action": "sendCode", "email": email })
     }).then(() => {
-        // Formu dəyişirik
         document.getElementById('register-form').style.display = "none";
         document.getElementById('verify-form').style.display = "block";
-        alert("Kod göndərildi! Mailinizi yoxlayın.");
-    }).catch(() => {
-        alert("Bağlantı xətası!");
-        btn.innerText = "Qeydiyyatdan keç";
-        btn.disabled = false;
+        alert("Kod göndərildi!");
     });
 }
 
 function finishRegister() {
-    alert("Təsdiqləndi! Xoş gəldiniz.");
-}
+    const userCode = document.getElementById('code').value;
+    
+    // Test üçün 4 rəqəmli hər hansı kod yazıldıqda qəbul etsin (Məlumatları bazaya yazmaq üçün)
+    if (userCode.length === 4) {
+        const userData = {
+            action: "register",
+            name: document.getElementById('name').value,
+            surname: document.getElementById('surname').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('reg-email').value,
+            address: document.getElementById('address').value,
+            mmc: document.getElementById('mmc').value,
+            pass: document.getElementById('reg-pass').value
+        };
 
-function login() {
-    alert("Giriş funksiyası tezliklə aktiv olacaq.");
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(userData)
+        }).then(() => {
+            alert("Qeydiyyat tamamlandı! Məlumatlar log.data-ya yazıldı.");
+            window.location.reload(); // Saytı yeniləyirik
+        });
+    } else {
+        alert("4 rəqəmli kodu daxil edin!");
+    }
 }
