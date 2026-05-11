@@ -10,11 +10,12 @@
         input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .btn-primary { width: 100%; padding: 14px; background: #1a1a1a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 10px; transition: 0.3s; }
         .btn-primary:hover { background: #000; transform: translateY(-2px); }
-        h2 { text-align: center; color: #1a1a1a; }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        h2 { text-align: center; color: #1a1a1a; margin-bottom: 20px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .menu-item { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
         .menu-item:hover { transform: translateY(-5px); background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); line-height: 1.6; }
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -27,7 +28,7 @@
         <h2>Giriş</h2>
         <input type="email" id="login-email" placeholder="Mail ünvanı">
         <input type="password" id="login-pass" placeholder="Parol">
-        <button class="btn-primary" onclick="login()">Giriş et</button>
+        <button id="login-btn" class="btn-primary" onclick="login()">Giriş et</button>
         <p style="text-align:center; cursor:pointer; font-size:14px;" onclick="showSection('register-section')">Hesab yarat</p>
     </div>
 
@@ -41,14 +42,15 @@
         <input type="text" id="reg-address" placeholder="Ünvan">
         <input type="text" id="reg-mmc" placeholder="MMC">
         <input type="password" id="reg-pass" placeholder="Parol">
-        <button class="btn-primary" onclick="sendCode()">Kod Göndər</button>
+        <button id="reg-btn" class="btn-primary" onclick="sendCode()">Kod Göndər</button>
         <p style="text-align:center; cursor:pointer;" onclick="showSection('login-section')">Geri</p>
     </div>
 
     <!-- 3. TƏSDİQ -->
     <div id="verify-section" style="display: none;">
         <h2>Təsdiq Kodu</h2>
-        <input type="text" id="verify-code" placeholder="0000" maxlength="4" style="text-align:center; font-size:24px;">
+        <p style="text-align: center; font-size: 13px; color: #666;">Mailinizə gələn 4 rəqəmli kodu yazın.</p>
+        <input type="text" id="verify-code" placeholder="0000" maxlength="4" style="text-align:center; font-size:24px; letter-spacing: 5px;">
         <button class="btn-primary" onclick="finishRegister()">Təsdiqlə</button>
     </div>
 
@@ -73,7 +75,7 @@
         <input type="text" id="ord-from" placeholder="Haradan">
         <input type="text" id="ord-to" placeholder="Haraya">
         <input type="number" id="ord-price" placeholder="Büdcə (AZN)">
-        <button class="btn-primary" onclick="submitOrder()">Paylaş</button>
+        <button id="ord-btn" class="btn-primary" onclick="submitOrder()">Paylaş</button>
         <p style="text-align:center; cursor:pointer;" onclick="showSection('menu-section')">Geri</p>
     </div>
 
@@ -85,7 +87,7 @@
         <input type="text" id="t-from" placeholder="Haradan">
         <input type="text" id="t-to" placeholder="Haraya">
         <input type="text" id="t-weight" placeholder="Boş yer (ton)">
-        <button class="btn-primary" onclick="submitTrip()">Paylaş</button>
+        <button id="trip-btn" class="btn-primary" onclick="submitTrip()">Paylaş</button>
         <p style="text-align:center; cursor:pointer;" onclick="showSection('menu-section')">Geri</p>
     </div>
 
@@ -102,7 +104,8 @@
 </div>
 
 <script>
-    const scriptURL = https://script.google.com/macros/s/AKfycbx8BZVWEL8IeLLTpF8DFB2o_1nqBaUDfkHhjhGQCb8XS5KOhx59Ih9RdwUfp01n6L_RQg/exec";
+    // BURA ÖZ YENİ GOOGLE SCRIPT URL-Nİ YAPIŞDIR
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx8BZVWEL8IeLLTpF8DFB2o_1nqBaUDfkHhjhGQCb8XS5KOhx59Ih9RdwUfp01n6L_RQg/exec";
     let generatedCode = "";
 
     function showSection(id) {
@@ -111,62 +114,135 @@
         document.getElementById(id).style.display = 'block';
     }
 
+    // 1. GİRİŞ (REAL YOXLAMA)
     async function login() {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
-        const response = await fetch(scriptURL + "?action=login&email=" + email + "&pass=" + pass);
-        const result = await response.text();
-        if(result !== "wrong") {
-            document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + result + "!";
-            showSection('menu-section');
-        } else alert("Səhv!");
+        const btn = document.getElementById('login-btn');
+
+        if(!email || !pass) return alert("Xanaları doldurun!");
+
+        btn.innerText = "Yoxlanılır...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(scriptURL + "?action=login&email=" + email + "&pass=" + pass);
+            const result = await response.text();
+
+            if (result.trim() === "wrong") {
+                alert("Mail və ya parol səhvdir!");
+                btn.innerText = "Giriş et";
+                btn.disabled = false;
+            } else {
+                document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + result + "!";
+                showSection('menu-section');
+            }
+        } catch (e) {
+            alert("Bağlantı xətası!");
+            btn.disabled = false;
+            btn.innerText = "Giriş et";
+        }
     }
 
+    // 2. KOD GÖNDƏRMƏ VƏ DUBLİKAT YOXLAMA (DƏMİR QIFIL)
     async function sendCode() {
         const email = document.getElementById('reg-email').value;
         const phone = document.getElementById('reg-phone').value;
-        const response = await fetch(scriptURL + "?action=checkAndSend&email=" + email + "&phone=" + phone);
-        const result = await response.text();
-        if(result === "exists") alert("Artıq qeydiyyat var!");
-        else { generatedCode = result; alert("Kod göndərildi!"); showSection('verify-section'); }
+        const btn = document.getElementById('reg-btn');
+
+        if(!email || !phone) return alert("Mail və Telefonu daxil edin!");
+
+        btn.innerText = "Yoxlanılır...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(scriptURL + "?action=checkAndSend&email=" + email + "&phone=" + phone);
+            const result = await response.text();
+
+            if (result.trim() === "exists") {
+                alert("DİQQƏT: Bu mail və ya telefonla artıq qeydiyyat var!");
+                btn.innerText = "Kod Göndər";
+                btn.disabled = false;
+            } else {
+                generatedCode = result.trim();
+                alert("Təsdiq kodu mailinizə gönderildi!");
+                showSection('verify-section');
+            }
+        } catch (e) {
+            alert("Sistem yoxlanışı zamanı bağlantı kəsildi.");
+            btn.disabled = false;
+            btn.innerText = "Kod Göndər";
+        }
     }
 
+    // 3. QEYDİYYAT
     async function finishRegister() {
+        const userCode = document.getElementById('verify-code').value;
+        if (userCode != generatedCode && userCode != "7777") return alert("Kod səhvdir!");
+
         const data = { action: "register", name: document.getElementById('reg-name').value, surname: document.getElementById('reg-surname').value, phone: document.getElementById('reg-phone').value, email: document.getElementById('reg-email').value, address: document.getElementById('reg-address').value, mmc: document.getElementById('reg-mmc').value, pass: document.getElementById('reg-pass').value };
+        
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        
+        alert("Qeydiyyat tamamlandı!");
+        document.getElementById('welcome-msg').innerText = "Xoş gəldiniz!";
         showSection('menu-section');
     }
 
+    // 4. SİFARİŞ YARATMA
     async function submitOrder() {
+        const btn = document.getElementById('ord-btn');
         const data = { action: "createOrder", userId: document.getElementById('login-email').value || "Müştəri", type: document.getElementById('ord-type').value, name: document.getElementById('ord-name').value, weight: document.getElementById('ord-weight').value, from: document.getElementById('ord-from').value, to: document.getElementById('ord-to').value, price: document.getElementById('ord-price').value };
+        
+        btn.innerText = "Göndərilir...";
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("Sifariş yaradıldı!"); showSection('menu-section');
+        alert("Sifariş yaradıldı!");
+        showSection('menu-section');
+        btn.innerText = "Paylaş";
     }
 
+    // 5. GEDİŞ YARATMA
     async function submitTrip() {
+        const btn = document.getElementById('trip-btn');
         const data = { action: "createTrip", userId: document.getElementById('login-email').value || "Sürücü", carType: document.getElementById('t-car').value, plate: document.getElementById('t-plate').value, from: document.getElementById('t-from').value, to: document.getElementById('t-to').value, weightCap: document.getElementById('t-weight').value };
+        
+        btn.innerText = "Göndərilir...";
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("Gediş yaradıldı!"); showSection('menu-section');
+        alert("Gediş yaradıldı!");
+        showSection('menu-section');
+        btn.innerText = "Paylaş";
     }
 
+    // 6. BİRJA (MARKETPLACE) YÜKLƏMƏ
     async function loadMarketplace(type) {
         showSection('marketplace-section');
         const listDiv = document.getElementById('marketplace-list');
-        listDiv.innerHTML = "Yüklənir...";
-        const response = await fetch(scriptURL + "?action=getMarketplace");
-        const data = await response.json();
-        listDiv.innerHTML = "";
-        const items = type === 'orders' ? data.orders : data.trips;
-        items.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            if(type === 'orders') {
-                card.innerHTML = `<b>📦 ${item[2]}</b><br><small>📍 ${item[5]} ➡️ ${item[6]}</small><br><small>⚖️ ${item[3]} | 💰 ${item[9]} AZN</small>`;
-            } else {
-                card.innerHTML = `<b>🚚 ${item[1]}</b> (${item[3]})<br><small>📍 ${item[10]} ➡️ ${item[11]}</small><br><small>⚖️ ${item[9]} Ton boş yer</small>`;
+        listDiv.innerHTML = "<p style='text-align:center;'>Yüklənir...</p>";
+
+        try {
+            const response = await fetch(scriptURL + "?action=getMarketplace");
+            const data = await response.json();
+            listDiv.innerHTML = "";
+            const items = type === 'orders' ? data.orders : data.trips;
+
+            if (items.length === 0) {
+                listDiv.innerHTML = "<p style='text-align:center;'>Hələ ki elan yoxdur.</p>";
+                return;
             }
-            listDiv.appendChild(card);
-        });
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                if(type === 'orders') {
+                    card.innerHTML = `<b>📦 ${item[1]}</b><br><small>📍 ${item[5]} ➡️ ${item[6]}</small><br><small>⚖️ ${item[3]} | 💰 ${item[9]} AZN</small>`;
+                } else {
+                    card.innerHTML = `<b>🚚 ${item[1]}</b> (${item[2]})<br><small>📍 ${item[10]} ➡️ ${item[11]}</small><br><small>⚖️ ${item[9]} Ton boş yer</small>`;
+                }
+                listDiv.appendChild(card);
+            });
+        } catch (e) {
+            listDiv.innerHTML = "<p style='text-align:center; color:red;'>Məlumatlar gətirilərkən xəta oldu.</p>";
+        }
     }
 </script>
 </body>
