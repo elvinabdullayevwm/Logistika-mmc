@@ -9,10 +9,12 @@
         .auth-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 380px; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .btn-primary { width: 100%; padding: 14px; background: #1a1a1a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        .btn-primary:disabled { background: #ccc; }
         h2 { text-align: center; color: #1a1a1a; }
         .nav-link { text-align: center; color: #555; cursor: pointer; margin-top: 15px; font-size: 14px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .menu-item { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #eee; }
+        .menu-item { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
+        .menu-item:hover { transform: translateY(-5px); background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -24,7 +26,7 @@
         <input type="email" id="login-email" placeholder="Mail">
         <input type="password" id="login-pass" placeholder="Parol">
         <button class="btn-primary" onclick="login()">Giriş et</button>
-        <p class="nav-link" onclick="showSection('register-section')">Qeydiyyat</p>
+        <p class="nav-link" onclick="showSection('register-section')">Hesab yarat</p>
     </div>
 
     <!-- 2. QEYDİYYAT -->
@@ -37,33 +39,33 @@
         <input type="text" id="reg-address" placeholder="Ünvan">
         <input type="text" id="reg-mmc" placeholder="MMC">
         <input type="password" id="reg-pass" placeholder="Parol">
-        <button class="btn-primary" onclick="sendCode()">Kod Göndər</button>
+        <button id="code-btn" class="btn-primary" onclick="sendCode()">Kod Göndər</button>
         <p class="nav-link" onclick="showSection('login-section')">Geri</p>
     </div>
 
     <!-- 3. TƏSDİQ -->
     <div id="verify-section" style="display: none;">
         <h2>Təsdiq Kodu</h2>
-        <input type="text" id="verify-code" placeholder="0000" maxlength="4">
+        <input type="text" id="verify-code" placeholder="0000" maxlength="4" style="text-align: center; font-size: 24px;">
         <button class="btn-primary" onclick="finishRegister()">Təsdiqlə</button>
     </div>
 
-    <!-- 4. ANA MENYU -->
+    <!-- 4. ANA MENYU (STURKTRUR 1) -->
     <div id="menu-section" style="display: none;">
         <h2 id="welcome-msg">Xoş gəldiniz!</h2>
         <div class="menu-grid">
-            <div class="menu-item">📦<br>Sifariş</div>
-            <div class="menu-item">🚚<br>Gediş</div>
-            <div class="menu-item">📜<br>Tarixçə</div>
-            <div class="menu-item">⚙️<br>Parametr</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">📦<br>Sifariş yarat</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">🚚<br>Gediş yarat</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">📜<br>Tarixçə</div>
+            <div class="menu-item" onclick="alert('Tezliklə!')">⚙️<br>Parametrlər</div>
         </div>
-        <button class="btn-primary" style="background:red;" onclick="location.reload()">Çıxış</button>
+        <button class="btn-primary" style="background:#ff4757; margin-top:20px;" onclick="location.reload()">Çıxış</button>
     </div>
 </div>
 
 <script>
     // BURA ÖZ YENİ GOOGLE SCRIPT URL-Nİ YAPIŞDIR
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyMlQY3OSfEtytP9CKGweiQclEjAkccj3dmL-gKJHVHv3yd7zcsOiAEAXfH1oxJ6I--gA/execc";
+    const scriptURL = "https://google.com";
 
     function showSection(id) {
         document.getElementById('login-section').style.display = 'none';
@@ -73,13 +75,33 @@
         document.getElementById(id).style.display = 'block';
     }
 
-    function sendCode() {
+    async function sendCode() {
         const email = document.getElementById('reg-email').value;
-        if(!email) return alert("Mail yazın!");
-        
-        fetch(scriptURL + "?action=sendCode&email=" + email, { mode: 'no-cors' });
-        alert("Kod göndərilir...");
-        showSection('verify-section');
+        const phone = document.getElementById('reg-phone').value;
+        const btn = document.getElementById('code-btn');
+
+        if(!email || !phone) return alert("Mail və Telefon nömrəsini daxil edin!");
+
+        btn.innerText = "Yoxlanılır...";
+        btn.disabled = true;
+
+        try {
+            // Dublikat yoxlaması və kod tələbi
+            const response = await fetch(scriptURL + "?action=checkAndSend&email=" + email + "&phone=" + phone);
+            const result = await response.text();
+
+            if (result === "exists") {
+                alert("Bu mail və ya telefon nömrəsi ilə artıq qeydiyyatdan keçilib!");
+                btn.innerText = "Kod Göndər";
+                btn.disabled = false;
+            } else {
+                alert("Yeni təsdiq kodu mailinizə göndərildi!");
+                showSection('verify-section');
+            }
+        } catch (e) {
+            // CORS maneəsi ehtimalına qarşı birbaşa keçid (test üçün)
+            showSection('verify-section');
+        }
     }
 
     async function finishRegister() {
@@ -95,11 +117,16 @@
         };
 
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        
         alert("Qeydiyyat tamamlandı!");
+        document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + data.name + "!";
         showSection('menu-section');
     }
 
-    function login() { showSection('menu-section'); }
+    function login() { 
+        // Hələlik birbaşa menyuya keçir (Login məntiqi növbəti mərhələdir)
+        showSection('menu-section'); 
+    }
 </script>
 </body>
 </html>
