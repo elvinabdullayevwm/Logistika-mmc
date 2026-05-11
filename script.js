@@ -1,11 +1,14 @@
+// Google Apps Script-dən kopyaladığın URL-i aşağıdakı dırnaqların arasına yapışdır:
+const scriptURL = "BURA_LINKI_YAPISDIR"; 
+
+let generatedCode = ""; 
+
 function toggleAuth() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const authBox = document.getElementById('auth-box');
 
-    // Keçid animasiyasını yeniləyirik
     authBox.style.opacity = "0";
-    
     setTimeout(() => {
         if (loginForm.style.display === "none") {
             loginForm.style.display = "block";
@@ -19,11 +22,42 @@ function toggleAuth() {
 }
 
 function sendCode() {
-    // Struktur 1.3.8-ə keçid
-    document.getElementById('register-form').style.display = "none";
-    document.getElementById('verify-form').style.display = "block";
+    const email = document.getElementById('reg-email').value;
+    if(!email) return alert("Zəhmət olmasa mailinizi yazın!");
+
+    // Düyməni müvəqqəti söndürək ki, çox basılmasın
+    const btn = document.querySelector("#register-form .btn-primary");
+    btn.innerText = "Göndərilir...";
+    btn.disabled = true;
+
+    fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify({ "action": "sendCode", "email": email })
+    })
+    .then(res => res.json())
+    .then(response => {
+        if(response.result === "success") {
+            generatedCode = response.code; // Google-dan gələn kodu yadda saxla
+            document.getElementById('register-form').style.display = "none";
+            document.getElementById('verify-form').style.display = "block";
+            alert("Təsdiq kodu mailinizə göndərildi!");
+        } else {
+            alert("Xəta baş verdi, yenidən yoxlayın.");
+        }
+    })
+    .catch(error => {
+        console.error('Error!', error.message);
+        btn.innerText = "Qeydiyyatdan keç";
+        btn.disabled = false;
+    });
 }
 
-function login() {
-    alert("Tezliklə: Google Sheets bağlantısı qurulacaq!");
+function finishRegister() {
+    const userCode = document.getElementById('code').value;
+    if (userCode == generatedCode) {
+        alert("Təsdiqləndi! Xoş gəldiniz.");
+        // Bura qeydiyyatdan sonra hara gedəcəyini yazacağıq
+    } else {
+        alert("Daxil etdiyiniz kod səhvdir.");
+    }
 }
