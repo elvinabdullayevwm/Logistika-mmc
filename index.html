@@ -107,6 +107,7 @@
     // BURA ÖZ YENİ GOOGLE SCRIPT URL-Nİ YAPIŞDIR
     const scriptURL = "https://script.google.com/macros/s/AKfycbx8BZVWEL8IeLLTpF8DFB2o_1nqBaUDfkHhjhGQCb8XS5KOhx59Ih9RdwUfp01n6L_RQg/exec";
     let generatedCode = "";
+    let currentUserEmail = ""; // Giriş edən istifadəçini yadda saxlayırıq
 
     function showSection(id) {
         const sections = ['login-section', 'register-section', 'verify-section', 'menu-section', 'order-section', 'trip-section', 'marketplace-section'];
@@ -114,7 +115,7 @@
         document.getElementById(id).style.display = 'block';
     }
 
-    // 1. GİRİŞ (REAL YOXLAMA)
+    // 1. GİRİŞ
     async function login() {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
@@ -134,6 +135,7 @@
                 btn.innerText = "Giriş et";
                 btn.disabled = false;
             } else {
+                currentUserEmail = email; // Email-i global dəyişənə yazırıq
                 document.getElementById('welcome-msg').innerText = "Xoş gəldiniz, " + result + "!";
                 showSection('menu-section');
             }
@@ -144,7 +146,7 @@
         }
     }
 
-    // 2. KOD GÖNDƏRMƏ VƏ DUBLİKAT YOXLAMA (DƏMİR QIFIL)
+    // 2. KOD GÖNDƏRMƏ
     async function sendCode() {
         const email = document.getElementById('reg-email').value;
         const phone = document.getElementById('reg-phone').value;
@@ -180,19 +182,39 @@
         const userCode = document.getElementById('verify-code').value;
         if (userCode != generatedCode && userCode != "7777") return alert("Kod səhvdir!");
 
-        const data = { action: "register", name: document.getElementById('reg-name').value, surname: document.getElementById('reg-surname').value, phone: document.getElementById('reg-phone').value, email: document.getElementById('reg-email').value, address: document.getElementById('reg-address').value, mmc: document.getElementById('reg-mmc').value, pass: document.getElementById('reg-pass').value };
+        const emailForReg = document.getElementById('reg-email').value;
+        const data = { 
+            action: "register", 
+            name: document.getElementById('reg-name').value, 
+            surname: document.getElementById('reg-surname').value, 
+            phone: document.getElementById('reg-phone').value, 
+            email: emailForReg, 
+            address: document.getElementById('reg-address').value, 
+            mmc: document.getElementById('reg-mmc').value, 
+            pass: document.getElementById('reg-pass').value 
+        };
         
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
         
+        currentUserEmail = emailForReg; // Qeydiyyatdan sonra birbaşa email-i mənimsədirik
         alert("Qeydiyyat tamamlandı!");
-        document.getElementById('welcome-msg').innerText = "Xoş gəldiniz!";
         showSection('menu-section');
     }
 
-    // 4. SİFARİŞ YARATMA
+    // 4. SİFARİŞ YARATMA (GÜCLƏNDİRİLMİŞ)
     async function submitOrder() {
+        if(!currentUserEmail) return alert("Sessiya xətası, yenidən giriş edin.");
         const btn = document.getElementById('ord-btn');
-        const data = { action: "createOrder", userId: document.getElementById('login-email').value || "Müştəri", type: document.getElementById('ord-type').value, name: document.getElementById('ord-name').value, weight: document.getElementById('ord-weight').value, from: document.getElementById('ord-from').value, to: document.getElementById('ord-to').value, price: document.getElementById('ord-price').value };
+        const data = { 
+            action: "createOrder", 
+            userId: currentUserEmail, // BURADA EMAIL GÖNDƏRİLİR, BACKEND ONU ID-YƏ ÇEVİRƏCƏK
+            type: document.getElementById('ord-type').value, 
+            name: document.getElementById('ord-name').value, 
+            weight: document.getElementById('ord-weight').value, 
+            from: document.getElementById('ord-from').value, 
+            to: document.getElementById('ord-to').value, 
+            price: document.getElementById('ord-price').value 
+        };
         
         btn.innerText = "Göndərilir...";
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
@@ -201,10 +223,19 @@
         btn.innerText = "Paylaş";
     }
 
-    // 5. GEDİŞ YARATMA
+    // 5. GEDİŞ YARATMA (GÜCLƏNDİRİLMİŞ)
     async function submitTrip() {
+        if(!currentUserEmail) return alert("Sessiya xətası, yenidən giriş edin.");
         const btn = document.getElementById('trip-btn');
-        const data = { action: "createTrip", userId: document.getElementById('login-email').value || "Sürücü", carType: document.getElementById('t-car').value, plate: document.getElementById('t-plate').value, from: document.getElementById('t-from').value, to: document.getElementById('t-to').value, weightCap: document.getElementById('t-weight').value };
+        const data = { 
+            action: "createTrip", 
+            userId: currentUserEmail, // BURADA EMAIL GÖNDƏRİLİR, BACKEND ONU ID-YƏ ÇEVİRƏCƏK
+            carType: document.getElementById('t-car').value, 
+            plate: document.getElementById('t-plate').value, 
+            from: document.getElementById('t-from').value, 
+            to: document.getElementById('t-to').value, 
+            weightCap: document.getElementById('t-weight').value 
+        };
         
         btn.innerText = "Göndərilir...";
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
@@ -213,7 +244,7 @@
         btn.innerText = "Paylaş";
     }
 
-    // 6. BİRJA (MARKETPLACE) YÜKLƏMƏ
+    // 6. BİRJA YÜKLƏMƏ
     async function loadMarketplace(type) {
         showSection('marketplace-section');
         const listDiv = document.getElementById('marketplace-list');
